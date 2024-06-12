@@ -1,4 +1,16 @@
-# webapp-gke
+Web Application Project
+
+Overview
+This project is a web application developed to demonstrate the integration of frontend, backend, and database connectivity. The application is containerized using Docker, deployed using Kubernetes on Google Kubernetes Engine (GKE), and version controlled with GitHub. The frontend is built using HTML, CSS, and JavaScript, while the backend is developed with Python and Flask. The application also connects to a PostgreSQL database.
+
+Table of Contents
+Features
+Getting Started
+Deployment
+Database Connection
+Troubleshooting
+Features
+Frontend
 
 # Project structure 
 
@@ -30,3 +42,128 @@ webapp-gke/
             ├── index.js
             ├── index.css
             └── ...
+
+Features
+
+Frontend:
+React site to capture two values.
+JavaScript for form submission and validation.
+CSS for responsive styling.
+
+Backend:
+Python Flask application to handle form data.
+PostgreSQL database connectivity.
+Error handling and logging.
+
+Deployment:
+Docker containers for frontend and backend.
+Kubernetes configurations for deployment on GKE.
+Load balancer configuration.
+Basic monitoring and logging setup.
+
+Project Setup:
+
+1. Develop FrontEnd of Webapp:
+
+-> Create the HTML file (index.html)to capture the data.
+-> Create Javascript file (script.js)
+-> Enhance the webpage usign style sheets (styles.css)
+
+2. Develop Backend application :
+
+-> Create the python application (app.py) to connect frontend to capture the data from frontend and load to database.
+-> Create requirements.txt to install pre-requisite libraries
+Flask
+Flask-SQLAlchemy
+psycopg2-binary
+flask_cors
+-> Run the file in local machine
+
+ python app.py
+
+3. Push the local repository to Github :
+
+-> Open Git Bash and loacte the project directory and run following commands to initialize, add and push code to Github repo
+
+git init
+git add. #add all the files
+git commit -m "commit message of first initilization"
+git remote add origin <github_repo_url> #Connect Github repo from local machine
+git push -u origin main #Push the changes made in code to Github main branch
+
+4. Clone Github repository to Google Source Repository :
+
+-> Open Google Cloud shell and connect the terminal and set configuration to your project
+
+gcloud config set project [ProjectID] #Config your project id
+git clone <GithubRepo_URL>
+
+5. Create and intialize a container:
+
+-> Enable Required APIs: Enable the Google Kubernetes Engine (GKE) API.
+-> Create a Cluster.
+-> Configure kubectl to use GKE Cluster
+
+gcloud services enable container.googleapis.com
+ gcloud container clusters [CLUSTER_NAME] \
+  --zone [ZONE] \
+  --num-nodes [NUM of NODES] \
+  --machine-type e2-medium \
+  --disk-size 10GB
+ gcloud container clusters get-credentials [CLUSTER_NAME] --zone [ZONE]
+
+Deployment
+1. Push the image to Artifact Registry using Docker:
+
+-> Build the docker image for both frontend and backend.
+-> Push the docker image for both frontend and backend.
+docker build -t gcr.io/[Project-ID]/[Tag-Name]:latest .
+docker push gcr.io/[Project-ID]/[Tag-Name]:latest .
+
+2. Deploy configuration file:
+
+-> Create and apply a deployment configuration file for both frontend and backend.
+-> Create and apply a service configuration file for both frontend and backend.
+kubectl apply -f <Deployment-File> # Deployment YAML file for backend and frontend
+kubectl apply -f <Service-File> #Service YAML file for backend and frontend
+
+3. Verify Deployment Status:
+
+-> Check the status of your deployment and services with the commands.
+ kubectl get deployments
+ kubectl get pods
+ kubectl get services
+
+Database Connection
+
+1. Connect PostgreSQL with application:
+
+-> Prerequisite - Verify the python application app.py backend in configured with PostgreSQL database credentials correctly.
+
+2. Collect Form Data:
+
+-> The backend Flask application will handle POST requests to collect data from the frontend form and insert it into the PostgreSQL database.
+-> Once you have External IP address , update the javascript file and append the External IP or DNS to trigger the fetch function.
+-> Delete the deployment file for both backend and frontend and reapply the kubectl deployment file.
+-> Run the PSql command to connect database via gcloud shell:
+
+ psql -h [Database-HostIP] -U postgres -d postgres #Enter the public IP of PostgreSQL database
+ 
+-> This will prompt to enter database password -- Enter Database password
+-> Check the database by running this command.
+Select * from [Schema][Name]; # Enter the schema i.e name of schema where table resides and Name is the database table name
+
+Troubleshooting
+
+1. Curl Command:
+
+-> This command sends a POST request to the URL http://[namespace].default.svc.cluster.local:5000/submit with a JSON payload.
+    curl -X POST http://[ExternalIP / DNS]:[targetPort]/submit -H "Content-Type: application/json" -d '{"value1": "test1", "value2": "test2"}'
+
+2. Pod Deployment error:
+
+-> To check the ImagePullOFF / CrashbackOFF error verify the pods using kubectl command.
+       kubectl logs -f [pod-name]
+       kubectl exec -it [pod-name] -- /bin/bash
+       kubectl decribe pods [pod-name]
+       kubectl exec -it [pod-name] -- nslookup [ExternalIP]
